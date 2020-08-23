@@ -195,8 +195,7 @@ class Sudoku:
 
         self.purgeBlocks()
 
-        # Attempt to fill in blanks in rows
-        # Attempt to fill in blanks in blocks
+        self.checkBlocksStragglers()
 
     """ This will purge non-possible values from each row """
     def purgeRows(self):
@@ -241,10 +240,47 @@ class Sudoku:
                     value = [i for i in value if i not in seen]
                     block.setValue(x, y, value)
 
+    """ This will check for values that can only be in a single block and no others """
+    def checkBlocksStragglers(self):
+        for y in range(self.board.columns):
+            for x in range(self.board.rows):
+                self.checkBlockStragglers(x, y)
+
+    def checkBlockStragglers(self, x, y):
+        block = self.board.getBlock(x, y)
+
+        # First we count how often each possible value can be seen
+        counts = {}
+        for y in range(block.height):
+            for x in range(block.width):
+                value = block.getValue(x, y)
+                for item in value:
+                    if item in counts: counts[item] += 1
+                    else: counts[item] = 1
+
+        # Then we create a list of values that we are certain are unique
+        uniques = []
+        for key in counts:
+            if counts[key] == 1:
+                uniques.append(key)
+
+        # Then we iterate through and purge all other values from cells that contain only unique values
+        for y in range(block.height):
+            for x in range(block.width):
+                value = block.getValue(x, y)
+                possible = set(value) & set(uniques)
+                if len(possible) > 0:
+                    block.setValue(x, y, list(possible))
+
+examples = [
+"003020600900305001001806400008102900700000008006708200002609500800203009005010300",
+"200080300060070084030500209000105408000000000402706000301007040720040060004010003",
+"000000907000420180000705026100904000050000040000507009920108000034059000507000000"
+]
 game = Sudoku()
-game.board.setPattern("003020600900305001001806400008102900700000008006708200002609500800203009005010300")
+game.board.setPattern(examples[1])
 game.board.render()
-for n in range(10): game.solve()
+for n in range(100): game.solve()
 print()
 game.board.render()
 #game.board.inspect()
