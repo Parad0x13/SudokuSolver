@@ -1,4 +1,4 @@
-# [NOTE] Rendering is handled by rastering since I want this to be entirely cross platform/terminal compatable
+# [NOTE] Rendering is handled by rastering since I want this to be entirely cross platform/terminal compatible
 
 class Sudoku_Cell:
     def __init__(self, default = [1, 2, 3, 4, 5, 6, 7, 8, 9]):
