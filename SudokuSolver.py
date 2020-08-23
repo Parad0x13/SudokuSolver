@@ -337,6 +337,8 @@ class Sudoku:
                 if len(possible) > 0:
                     block.setValue(x, y, list(possible))
 
+# Here are some examples of how this might be used
+"""
 examples = [
 "003020600900305001001806400008102900700000008006708200002609500800203009005010300",
 "200080300060070084030500209000105408000000000402706000301007040720040060004010003",
@@ -350,3 +352,4 @@ game.board.render()
 solution = game.solve()
 game.board.render()
 print(solution)
+"""
