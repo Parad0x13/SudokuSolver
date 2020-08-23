@@ -220,21 +220,22 @@ class Sudoku:
                     game = Sudoku()
                     game.board.setPattern(pattern)
                     game.board.setValueXY(x, y, item)
-                    game.solve(isMaster = False)
+                    solved = game.solve(isMaster = False)
+                    if solved:
+                        self.board = game.board
+                        return
 
     def solve(self, isMaster = True):
         # Do this a bunch of times to ensure equilibrium is achieved
         for n in range(100): self.iterate()
 
-        if self.isSolved():
-            print("Yay it's solved!")
-            self.board.render()
-            print(self.board.getPattern())
-            exit()
+        if self.isSolved(): return self.board.getPattern()    # In the event that we solve it the first time
 
         # If there is no solution we iterate through all values until a solution is generated, hopefully
         # We only want the master to generate new boards, otherwise we'll end up in an endless loop
         if isMaster: self.spawnGames()
+
+        return self.board.getPattern()
 
     def isSolved(self):
         for y in range(self.board.height):
@@ -340,9 +341,12 @@ examples = [
 "003020600900305001001806400008102900700000008006708200002609500800203009005010300",
 "200080300060070084030500209000105408000000000402706000301007040720040060004010003",
 "000000907000420180000705026100904000050000040000507009920108000034059000507000000",
-"030050040008010500460000012070502080000603000040109030250000098001020600080060020"
+"030050040008010500460000012070502080000603000040109030250000098001020600080060020",
+"020810740700003100090002805009040087400208003160030200302700060005600008076051090"
 ]
 game = Sudoku()
-game.board.setPattern(examples[2])
+game.board.setPattern(examples[4])
 game.board.render()
-game.solve()
+solution = game.solve()
+game.board.render()
+print(solution)
