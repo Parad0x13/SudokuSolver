@@ -30,6 +30,8 @@ class Sudoku_Block:
     def getCell(self, x, y): return self.data[y][x]
 
     def setValue(self, x, y, value):
+        if value == "0" or value == ".": return
+
         cell = self.getCell(x, y)
         cell.setValue(value)
 
@@ -77,10 +79,65 @@ class Sudoku_Board:
         block = self.getBlock(column, row)
         block.setValue(blockX, blockY, value)
 
+    def setValueXY(self, x, y, value):
+        block = self.getBlock(0, 0)
+        totalWidth = block.width * self.columns
+        totalHeight = block.height * self.rows
+
+        # [TODO] Find a more elegant way of doing this below, I'm tired and can't figure out the math right now...
+        column = 0
+        row = 0
+
+        xCounter = 0
+        for n in range(x):
+            xCounter += 1
+            if xCounter == block.width:
+                column += 1
+                xCounter = 0
+
+        yCounter = 0
+        for n in range(y):
+            yCounter += 1
+            if yCounter == block.height:
+                row += 1
+                yCounter = 0
+
+        blockX = x - (column * block.width)
+        blockY = y - (row * block.height)
+        # [TODO] Find a more elegant way of doing this above, I'm tired and can't figure out the math right now...
+
+        block = self.getBlock(column, row)
+        block.setValue(blockX, blockY, value)
+
+    def setPattern(self, pattern):
+        block = self.getBlock(0, 0)
+        totalWidth = block.width * self.columns
+        totalHeight = block.height * self.rows
+        assert len(pattern) == totalWidth * totalHeight
+
+        n = self.rows * block.width
+        rows = [pattern[i:i+n] for i in range(0, len(pattern), n)]
+
+        for y in range(totalHeight):
+            for x in range(totalWidth):
+                value = rows[y][x]
+                self.setValueXY(x, y, value)
+
+    def rotate(self, direction):
+        if direction == "cw":
+            for y in range(self.columns):
+                for x in range(self.rows):
+                    block = self.getBlock(x, y)
+                    block.data = list(zip(*block.data[::-1]))
+            self.data = list(zip(*self.data[::-1]))
+
+        if direction == "ccw":
+            for n in range(3): self.rotate("cw")
+
 class Sudoku:
     def __init__(self):
         self.board = Sudoku_Board()
 
 game = Sudoku()
-game.board.setValue(0, 0, 0, 0, 4)
+game.board.setPattern("003020600900305001001806400008102900700000008006708200002609500800203009005010300")
 game.board.render()
