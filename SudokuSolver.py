@@ -172,6 +172,17 @@ class Sudoku_Board:
                 value = rows[y][x]
                 self.setValueXY(x, y, value)
 
+    def getPattern(self):
+        retVal = ""
+
+        for y in range(self.width):
+            for x in range(self.height):
+                value = self.getValueXY(x, y)
+                if len(value) == 1: retVal += "{}".format(value[0])
+                else: retVal += "0"
+
+        return retVal
+
     def rotate(self, direction):
         if direction == "cw":
             for y in range(self.columns):
@@ -187,7 +198,7 @@ class Sudoku:
     def __init__(self):
         self.board = Sudoku_Board()
 
-    def solve(self):
+    def iterate(self):
         self.purgeRows()
         self.board.rotate("cw")
         self.purgeRows()
@@ -196,6 +207,40 @@ class Sudoku:
         self.purgeBlocks()
 
         self.checkBlocksStragglers()
+
+    # In the event master cannot solve the game
+    def spawnGames(self):
+        pattern = self.board.getPattern()
+
+        for y in range(self.board.height):
+            for x in range(self.board.width):
+                value = self.board.getValueXY(x, y)
+                if len(value) == 1: continue    # No need to try another game if the value is already known
+                for item in value:
+                    game = Sudoku()
+                    game.board.setPattern(pattern)
+                    game.board.setValueXY(x, y, item)
+                    game.solve(isMaster = False)
+
+    def solve(self, isMaster = True):
+        # Do this a bunch of times to ensure equilibrium is achieved
+        for n in range(100): self.iterate()
+
+        if self.isSolved():
+            print("Yay it's solved!")
+            self.board.render()
+            exit()
+
+        # If there is no solution we iterate through all values until a solution is generated, hopefully
+        # We only want the master to generate new boards, otherwise we'll end up in an endless loop
+        if isMaster: self.spawnGames()
+
+    def isSolved(self):
+        for y in range(self.board.height):
+            for x in range(self.board.width):
+                value = self.board.getValueXY(x, y)
+                if len(value) > 1: return False
+        return True
 
     """ This will purge non-possible values from each row """
     def purgeRows(self):
@@ -278,9 +323,6 @@ examples = [
 "000000907000420180000705026100904000050000040000507009920108000034059000507000000"
 ]
 game = Sudoku()
-game.board.setPattern(examples[1])
+game.board.setPattern(examples[2])
 game.board.render()
-for n in range(100): game.solve()
-print()
-game.board.render()
-#game.board.inspect()
+game.solve()
