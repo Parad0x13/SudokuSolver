@@ -12,7 +12,9 @@ class Sudoku_Cell:
 
         return retVal
 
-    def setValue(self, value): self.data = [int(value)]
+    def setValue(self, value):
+        if type(value) == list: self.data = value    # In the event that we pass a new list of integers
+        else: self.data = [int(value)]    # In the event that we pass a single integer
 
 class Sudoku_Block:
     def __init__(self, width = 3, height = 3):
@@ -187,25 +189,62 @@ class Sudoku:
 
     def solve(self):
         self.purgeRows()
+        self.board.rotate("cw")
+        self.purgeRows()
+        self.board.rotate("ccw")
 
-        #rotate cw
-        #purgeRows()
-        #rotate ccw
-        #purge blocks
+        self.purgeBlocks()
+
+        # Attempt to fill in blanks in rows
+        # Attempt to fill in blanks in blocks
 
     """ This will purge non-possible values from each row """
     def purgeRows(self):
-        self.purgeRow(0)
+        for y in range(self.board.height):
+            self.purgeRow(y)
 
     def purgeRow(self, y):
-        pass
+        # First we go through and check all values that are known
+        seen = []
+        for x in range(self.board.width):
+            value = self.board.getValueXY(x, y)
+            if len(value) == 1: seen.append(value[0])
+
+        # Then we go through and purge those values from any cell that is not known
+        for x in range(self.board.width):
+            value = self.board.getValueXY(x, y)
+            if len(value) != 1:
+                value = [i for i in value if i not in seen]
+                self.board.setValueXY(x, y, value)
 
     """ This will purge non-possible values from each block """
     def purgeBlocks(self):
-        pass
+        for y in range(self.board.columns):
+            for x in range(self.board.rows):
+                self.purgeBlock(x, y)
+
+    def purgeBlock(self, x, y):
+        block = self.board.getBlock(x, y)
+
+        # First we go through and check all values that are known
+        seen = []
+        for y in range(block.height):
+            for x in range(block.width):
+                value = block.getValue(x, y)
+                if len(value) == 1: seen.append(value[0])
+
+        # Then we go through and purge those values from any cell that is not known
+        for y in range(block.height):
+            for x in range(block.width):
+                value = block.getValue(x, y)
+                if len(value) != 1:
+                    value = [i for i in value if i not in seen]
+                    block.setValue(x, y, value)
 
 game = Sudoku()
 game.board.setPattern("003020600900305001001806400008102900700000008006708200002609500800203009005010300")
 game.board.render()
-game.solve()
+for n in range(10): game.solve()
+print()
+game.board.render()
 #game.board.inspect()
