@@ -227,7 +227,7 @@ class Sudoku:
 
     def solve(self, isMaster = True):
         # Do this a bunch of times to ensure equilibrium is achieved
-        for n in range(100): self.iterate()
+        for n in range(10): self.iterate()
 
         if self.isSolved(): return self.board.getPattern()    # In the event that we solve it the first time
 
