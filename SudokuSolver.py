@@ -12,7 +12,7 @@ class Sudoku_Cell:
 
         return retVal
 
-    def setValue(self, value): self.data = [value]
+    def setValue(self, value): self.data = [int(value)]
 
 class Sudoku_Block:
     def __init__(self, width = 3, height = 3):
@@ -27,7 +27,17 @@ class Sudoku_Block:
             retVal += self.data[y][x].raster()
         return retVal
 
+    def inspect(self):
+        for y in range(self.height):
+            for x in range(self.width):
+                cell = self.getCell(x, y)
+                print("\tValues for {}, {} are {}".format(x, y, cell.data))
+
     def getCell(self, x, y): return self.data[y][x]
+
+    def getValue(self, x, y):
+        cell = self.getCell(x, y)
+        return cell.data
 
     def setValue(self, x, y, value):
         if value == "0" or value == ".": return
@@ -41,6 +51,10 @@ class Sudoku_Board:
         self.columns = columns
 
         self.data = [[Sudoku_Block() for x in range(self.columns)] for y in range(self.rows)]
+
+        block = self.getBlock(0, 0)
+        self.width = self.columns * block.width
+        self.height = self.rows * block.height
 
     def raster(self, row, blockY):
         retVal = ""
@@ -73,6 +87,13 @@ class Sudoku_Board:
                 print(line)
             print(rowSeperator)
 
+    def inspect(self):
+        for y in range(self.columns):
+            for x in range(self.rows):
+                print("Inspecting block {}, {}".format(x, y))
+                block = self.getBlock(x, y)
+                block.inspect()
+
     def getBlock(self, column, row): return self.data[row][column]
 
     def setValue(self, column, row, blockX, blockY, value):
@@ -81,8 +102,6 @@ class Sudoku_Board:
 
     def setValueXY(self, x, y, value):
         block = self.getBlock(0, 0)
-        totalWidth = block.width * self.columns
-        totalHeight = block.height * self.rows
 
         # [TODO] Find a more elegant way of doing this below, I'm tired and can't figure out the math right now...
         column = 0
@@ -109,17 +128,45 @@ class Sudoku_Board:
         block = self.getBlock(column, row)
         block.setValue(blockX, blockY, value)
 
+    ###
+    def getValueXY(self, x, y):
+        block = self.getBlock(0, 0)
+
+        # [TODO] Find a more elegant way of doing this below, I'm tired and can't figure out the math right now...
+        column = 0
+        row = 0
+
+        xCounter = 0
+        for n in range(x):
+            xCounter += 1
+            if xCounter == block.width:
+                column += 1
+                xCounter = 0
+
+        yCounter = 0
+        for n in range(y):
+            yCounter += 1
+            if yCounter == block.height:
+                row += 1
+                yCounter = 0
+
+        blockX = x - (column * block.width)
+        blockY = y - (row * block.height)
+        # [TODO] Find a more elegant way of doing this above, I'm tired and can't figure out the math right now...
+
+        block = self.getBlock(column, row)
+        return block.getValue(blockX, blockY)
+    ###
+
     def setPattern(self, pattern):
         block = self.getBlock(0, 0)
-        totalWidth = block.width * self.columns
-        totalHeight = block.height * self.rows
-        assert len(pattern) == totalWidth * totalHeight
+        assert len(pattern) == self.width * self.height
 
         n = self.rows * block.width
         rows = [pattern[i:i+n] for i in range(0, len(pattern), n)]
 
-        for y in range(totalHeight):
-            for x in range(totalWidth):
+        for y in range(self.height):
+            for x in range(self.width):
                 value = rows[y][x]
                 self.setValueXY(x, y, value)
 
@@ -138,6 +185,27 @@ class Sudoku:
     def __init__(self):
         self.board = Sudoku_Board()
 
+    def solve(self):
+        self.purgeRows()
+
+        #rotate cw
+        #purgeRows()
+        #rotate ccw
+        #purge blocks
+
+    """ This will purge non-possible values from each row """
+    def purgeRows(self):
+        self.purgeRow(0)
+
+    def purgeRow(self, y):
+        pass
+
+    """ This will purge non-possible values from each block """
+    def purgeBlocks(self):
+        pass
+
 game = Sudoku()
 game.board.setPattern("003020600900305001001806400008102900700000008006708200002609500800203009005010300")
 game.board.render()
+game.solve()
+#game.board.inspect()
