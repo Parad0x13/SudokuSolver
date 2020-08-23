@@ -235,7 +235,8 @@ class Sudoku:
         # We only want the master to generate new boards, otherwise we'll end up in an endless loop
         if isMaster: self.spawnGames()
 
-        return self.board.getPattern()
+        if isMaster == False: return False
+        else: return self.board.getPattern()
 
     def isSolved(self):
         for y in range(self.board.height):
@@ -338,18 +339,18 @@ class Sudoku:
                     block.setValue(x, y, list(possible))
 
 # Here are some examples of how this might be used
-"""
 examples = [
 "003020600900305001001806400008102900700000008006708200002609500800203009005010300",
 "200080300060070084030500209000105408000000000402706000301007040720040060004010003",
 "000000907000420180000705026100904000050000040000507009920108000034059000507000000",
 "030050040008010500460000012070502080000603000040109030250000098001020600080060020",
-"020810740700003100090002805009040087400208003160030200302700060005600008076051090"
+"020810740700003100090002805009040087400208003160030200302700060005600008076051090",
+"300200000000107000706030500070009080900020004010800050009040301000702000000008006"    # Problem 50
 ]
 game = Sudoku()
-game.board.setPattern(examples[4])
+game.board.setPattern(examples[5])
 game.board.render()
 solution = game.solve()
 game.board.render()
+#game.board.inspect()
 print(solution)
-"""
