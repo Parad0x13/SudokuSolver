@@ -241,6 +241,24 @@ class Sudoku:
             for x in range(self.board.width):
                 value = self.board.getValueXY(x, y)
                 if len(value) > 1: return False
+
+        # Now we check if the board is legally solved, it's possible a "solution" may have been found that is not legal
+        if self.checkLegality() == False: return False
+        self.board.rotate("cw")
+        if self.checkLegality() == False: return False
+        self.board.rotate("ccw")
+
+        return True
+
+    def checkLegality(self):
+        for y in range(self.board.height):
+            values = []
+            for x in range(self.board.width):
+                value = self.board.getValueXY(x, y)
+                # [BUG] For some reason value becomes [] if I don't throw this in a try except check. I have NO idea why
+                try: values.append(value[0])
+                except: pass
+            if len(set(values)) != len(values): return False
         return True
 
     """ This will purge non-possible values from each row """
